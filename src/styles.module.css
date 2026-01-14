@@ -1,0 +1,12 @@
+.customCard {
+    text-align: center;
+}
+
+.customCard:hover {
+    background-color: black;
+    color: white;
+}
+
+hr {
+    color: white !important;
+}
