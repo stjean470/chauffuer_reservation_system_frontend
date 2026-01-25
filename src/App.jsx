@@ -6,7 +6,7 @@ import AddCustomer from './components/customer/AddCustomer'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Home from './Home'
 import AddReservation from './components/customer/AddReservation'
-import LoginSignUp from './components/customer/loginSignUp'
+import LoginSignUp from './components/customer/LoginSignUp'
 
 
 function App() {
