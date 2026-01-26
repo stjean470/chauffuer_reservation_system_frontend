@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react'
 import { GoogleMap, useJsApiLoader, StandaloneSearchBox } from '@react-google-maps/api'
 import { Card, Label, TextInput } from 'flowbite-react'
 import Nav from '../../Nav'
+import { createReservation } from '../../services/ReservationServices'
+import { useNavigate } from 'react-router-dom'
 const AddReservation = () => {
   const [reservationType, setReservationType] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -18,6 +20,7 @@ const AddReservation = () => {
 
   const pickupAddressInputRef = useRef(null)
   const dropoffAddressInputRef = useRef(null)
+  const navigator = useNavigate();
 
   const { isLoaded } = useJsApiLoader({
       id: 'google-map-script',
@@ -48,8 +51,10 @@ const AddReservation = () => {
   const makeReservation = (e) => {
     e.preventDefault()
     const dateObj = new Date(pickUpTime)
+    const formattedDate = dateObj.toISOString().split('T')[0]
+    const formattedTime = dateObj.toTimeString().split(' ')[0]
     if(reservationType.length > 0) {
-      if (reservationType === 'Hourly') {
+      if (reservationType === 'HOURLY') {
         const reservation = {
           reservationType: reservationType,
           customer: {
@@ -58,13 +63,29 @@ const AddReservation = () => {
             email: email,
             phoneNumber: phoneNumber,
           },
-          pickUpAddress: pickUpAddress,
-          pickUpDate: dateObj.toLocaleDateString(),
-          time: dateObj.toLocaleTimeString(),
-          tripDuration: tripDuration,
-          numGuests: numGuests
+          pickupAddress: pickUpAddress,
+          date: formattedDate,
+          time: formattedTime,
+          trip_duration: tripDuration,
+          numOfGuests: parseInt(numGuests)
         }
-        console.log(reservation)
+        createReservation(reservation).then((response) => {
+          console.log("Reservation created successfully:", response.data)
+          setReservationType('')
+          setFirstName('')
+          setLastName('')
+          setEmail('')
+          setPhoneNumber('')
+          setTripType('')
+          setTripDuration('')
+          setPickUpAddress('')
+          setDropOffAddress('')
+          setPickUpTime('')
+          setNumGuests(1)
+          navigator('/')
+        }).catch((error) => {
+          console.error("Error creating reservation:", error)
+        })
       }else {
         const reservation = {
           reservationType: reservationType,
@@ -75,13 +96,29 @@ const AddReservation = () => {
             phoneNumber: phoneNumber,
           },
           tripType: tripType,
-          pickUpAddress: pickUpAddress,
+          pickupAddress: pickUpAddress,
           dropOffAddress: dropOffAddress,
-          pickUpDate: dateObj.toLocaleDateString(),
-          time: dateObj.toLocaleTimeString(),
-          numGuests: numGuests
+          date: formattedDate,
+          time: formattedTime,
+          numOfGuests: parseInt(numGuests)
         }
-        console.log(reservation)
+        createReservation(reservation).then((response) => {
+          console.log("Reservation created successfully:", response.data)
+          setReservationType('')
+          setFirstName('')
+          setLastName('')
+          setEmail('')
+          setPhoneNumber('')
+          setTripType('')
+          setTripDuration('')
+          setPickUpAddress('')
+          setDropOffAddress('')
+          setPickUpTime('')
+          setNumGuests(1)
+          navigator('/')
+        }).catch((error) => {
+          console.error("Error creating reservation:", error)
+        })
       }
     }else {
       return;
@@ -100,10 +137,10 @@ const AddReservation = () => {
             </div>
             <select className='block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-lg focus:ring-brand focus:border-brand shadow-xs placeholder:text-body' value={reservationType} onChange={(e) => setReservationType(e.target.value)}>
               <option value=''>Pick between one-way or Hourly Trip</option>
-              <option value='One-way'>One-Way</option>
-              <option value='Hourly'>Hourly</option>
+              <option value='ONE_WAY'>One-Way</option>
+              <option value='HOURLY'>Hourly</option>
             </select>
-            { reservationType === 'Hourly' ? (
+            { reservationType === 'HOURLY' ? (
             <>
 
               <div>
