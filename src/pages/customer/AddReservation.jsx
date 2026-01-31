@@ -50,10 +50,10 @@ const AddReservation = () => {
     }
   }
 
-  const getReservation = async (reservationId) => {
+  const getReservation = async (id) => {
     // Fetch reservation by ID and populate form for editing
     // This function can be implemented later if editing functionality is needed
-    getReservationById(reservationId).then((response) => {
+    getReservationById(id).then((response) => {
       const reservation = response.data
       // Populate form fields with reservation data
       setReservationType(reservation.reservationType)
@@ -152,6 +152,7 @@ const AddReservation = () => {
 
     useEffect(() => {
       if (id) {
+        console.log("Editing reservation with ID:", id)
         // Fetch existing reservation data by ID and populate form for editing
         getReservation(id)
       }

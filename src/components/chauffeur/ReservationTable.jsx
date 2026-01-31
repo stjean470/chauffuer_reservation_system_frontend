@@ -30,7 +30,6 @@ const ReservationTable = () => {
         // Navigate to the view reservation page with the reservation ID
         getReservationById(reservationId).then(response => {
             console.log("View Reservation data:", response.data);
-            navigator(`/viewReservation/${reservationId}`);
         }).catch(error => {
             console.error("Error fetching reservation:", error);
         });
