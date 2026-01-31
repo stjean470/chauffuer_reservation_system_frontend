@@ -4,7 +4,7 @@ const Nav = () => {
   return (
     <>
         <Navbar fluid rounded className='bg-black text-white'>
-            <NavbarBrand  href="https://flowbite-react.com">
+            <NavbarBrand  href="http://localhost:5173/">
                 <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Flowbite React</span>
             </NavbarBrand>
             <NavbarToggle />

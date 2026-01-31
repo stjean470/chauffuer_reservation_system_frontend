@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react'
 import { GoogleMap, useJsApiLoader, StandaloneSearchBox } from '@react-google-maps/api'
-import { Card, Label, TextInput } from 'flowbite-react'
+import { Card, Label, Select, TextInput } from 'flowbite-react'
 import Nav from '../../Nav'
-import { createReservation } from '../../services/ReservationServices'
-import { useNavigate } from 'react-router-dom'
+import { createReservation, getReservationById } from '../../services/ReservationServices'
+import { useNavigate, useParams } from 'react-router-dom'
 const AddReservation = () => {
   const [reservationType, setReservationType] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -21,6 +21,8 @@ const AddReservation = () => {
   const pickupAddressInputRef = useRef(null)
   const dropoffAddressInputRef = useRef(null)
   const navigator = useNavigate();
+  const {id} = useParams()
+  
 
   const { isLoaded } = useJsApiLoader({
       id: 'google-map-script',
@@ -46,6 +48,31 @@ const AddReservation = () => {
       console.log("Selected address:", address)
       setDropOffAddress(address)
     }
+  }
+
+  const getReservation = async (reservationId) => {
+    // Fetch reservation by ID and populate form for editing
+    // This function can be implemented later if editing functionality is needed
+    getReservationById(reservationId).then((response) => {
+      const reservation = response.data
+      // Populate form fields with reservation data
+      setReservationType(reservation.reservationType)
+      setFirstName(reservation.customer?.firstName)
+      setLastName(reservation.customer?.lastName)
+      setEmail(reservation.customer?.email)
+      setPhoneNumber(reservation.customer?.phoneNumber)
+      setPickUpAddress(reservation.pickupAddress)
+      setNumGuests(reservation.numOfGuests)
+      if(reservation.reservationType === 'ONE_WAY') {
+        setTripType(reservation.tripType)
+        setDropOffAddress(reservation.destination)
+        
+      }else {
+        setTripDuration(reservation.trip_duration)
+      }
+  }).catch((error) => {
+      console.error("Error fetching reservation:", error)
+    })
   }
 
   const makeReservation = (e) => {
@@ -97,13 +124,12 @@ const AddReservation = () => {
           },
           tripType: tripType,
           pickupAddress: pickUpAddress,
-          dropOffAddress: dropOffAddress,
+          destination: dropOffAddress,
           date: formattedDate,
           time: formattedTime,
           numOfGuests: parseInt(numGuests)
         }
         createReservation(reservation).then((response) => {
-          console.log("Reservation created successfully:", response.data)
           setReservationType('')
           setFirstName('')
           setLastName('')
@@ -123,6 +149,13 @@ const AddReservation = () => {
     }else {
       return;
     }
+
+    useEffect(() => {
+      if (id) {
+        // Fetch existing reservation data by ID and populate form for editing
+        getReservation(id)
+      }
+    }, []);
     
   }
   return (
@@ -135,11 +168,11 @@ const AddReservation = () => {
             <div className='block mb-2'>
               <Label>Reservation Type</Label>
             </div>
-            <select className='block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-lg focus:ring-brand focus:border-brand shadow-xs placeholder:text-body' value={reservationType} onChange={(e) => setReservationType(e.target.value)}>
+            <Select className='mb-2' value={reservationType} onChange={(e) => setReservationType(e.target.value)}>
               <option value=''>Pick between one-way or Hourly Trip</option>
               <option value='ONE_WAY'>One-Way</option>
               <option value='HOURLY'>Hourly</option>
-            </select>
+            </Select>
             { reservationType === 'HOURLY' ? (
             <>
 
@@ -148,6 +181,7 @@ const AddReservation = () => {
                   <Label>First Name</Label>
                 </div>
                 <TextInput
+                  className='mb-2'
                   placeholder='First Name'
                   id='firstName'  
                   name='firstName'
@@ -161,6 +195,7 @@ const AddReservation = () => {
                   <Label>Last Name</Label>
                 </div>
                 <TextInput
+                  className='mb-2'
                   placeholder='Last Name'
                   id='lastName'
                   name='lastName'
@@ -174,6 +209,7 @@ const AddReservation = () => {
                   <Label>Email</Label>
                 </div>
                 <TextInput
+                  className='mb-2'
                   placeholder='Email'
                   id='email'
                   name='email'
@@ -187,6 +223,7 @@ const AddReservation = () => {
                   <Label>Phone Number</Label>
                 </div>
                 <TextInput
+                  className='mb-2'
                   placeholder='Phone Number'
                   id='phoneNumber'
                   name='phoneNumber'
@@ -217,9 +254,8 @@ const AddReservation = () => {
                 <div className='block mb-2'>
                   <Label>Pickup Time</Label>
                 </div>
-                <input
+                <TextInput
                   type='datetime-local'
-                  className='block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body'
                   placeholder='Destination Address'
                   id='pickUpTime'
                   name='pickUpTime'
@@ -232,7 +268,7 @@ const AddReservation = () => {
                 <div className='block mb-2'>
                   <Label>Reservation Type</Label>
                 </div>
-                <select className='block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body' value={tripDuration} onChange={(e) => setTripDuration(e.target.value)}>
+                <Select className='mb-2' value={tripDuration} onChange={(e) => setTripDuration(e.target.value)}>
                   <option value=''>How Long?</option>
                   <option value='All Day'>All Day</option>
                   <option value='1'>1 Hour</option>
@@ -241,16 +277,15 @@ const AddReservation = () => {
                   <option value='4'>4 Hours</option>
                   <option value='5'>5 Hours</option>
                   <option value='6'>6 Hours</option>
-                </select>
+                </Select>
               </div>
               <div>
                 <div className='block mb-2'>
                   <Label>Number of Guests</Label>
                 </div>
-                <input
+                <TextInput
                   type='number'
                   min='1' max='10'  
-                  className='block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body'
                   id='numGuests'
                   name='numGuests'
                   value={numGuests}
@@ -267,6 +302,7 @@ const AddReservation = () => {
                   <Label>First Name</Label>
                 </div>
                 <TextInput
+                  className='mb-2'
                   placeholder='First Name'
                   id='firstName'  
                   name='firstName'
@@ -280,6 +316,7 @@ const AddReservation = () => {
                   <Label>Last Name</Label>
                 </div>
                 <TextInput
+                  className='mb-2'
                   placeholder='Last Name'
                   id='lastName'
                   name='lastName'
@@ -293,6 +330,7 @@ const AddReservation = () => {
                   <Label>Email</Label>
                 </div>
                 <TextInput
+                  className='mb-2'
                   placeholder='Email'
                   id='email'
                   name='email'
@@ -306,6 +344,7 @@ const AddReservation = () => {
                   <Label>Phone Number</Label>
                 </div>
                 <TextInput
+                  className='mb-2'
                   placeholder='Phone Number'
                   id='phoneNumber'
                   name='phoneNumber'
@@ -317,7 +356,7 @@ const AddReservation = () => {
                 <div className='block mb-2'>
                   <Label>Trip Type</Label>
                 </div>
-                <select className='block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body' value={tripType} onChange={(e) => setTripType(e.target.value)}>
+                <Select className='mb-2' value={tripType} onChange={(e) => setTripType(e.target.value)}>
                   <option value=''>Select a Trip Type</option>
                   <option value='Airport'>Airport</option>
                   <option value='Concert/Sports Event'>Concert/Sports Event</option>
@@ -326,7 +365,7 @@ const AddReservation = () => {
                   <option value='Business'>Business/Corporate</option>
                   <option value='Appointment'>Appointment</option>
                   <option value='Regular'>Regular</option>
-                </select>
+                </Select>
               </div>
               <div>
                 <div className='block mb-2'>
@@ -367,9 +406,8 @@ const AddReservation = () => {
               </div>
               <div className='form-group'>
                 <label>Pickup Time</label>
-                <input
+                <TextInput
                   type='datetime-local'
-                  className='block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-lg focus:ring-brand focus:border-brand shadow-xs placeholder:text-body'
                   id='pickUpTime'
                   name='pickUpTime'
                   value={pickUpTime}
@@ -382,10 +420,9 @@ const AddReservation = () => {
                 <div className='block mb-2'>
                   <Label>Number of Guests</Label>
                 </div>
-                <input
+                <TextInput
                   type='number'
                   min='1' max='10'  
-                  className='block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body'
                   id='numGuests'
                   name='numGuests'
                   value={numGuests}
