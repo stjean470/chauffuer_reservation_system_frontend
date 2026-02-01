@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { GoogleMap, useJsApiLoader, StandaloneSearchBox } from '@react-google-maps/api'
 import { Card, Label, Select, TextInput } from 'flowbite-react'
 import Nav from '../../Nav'
@@ -149,16 +149,16 @@ const AddReservation = () => {
     }else {
       return;
     }
+    
+  }
 
-    useEffect(() => {
+  useEffect(() => {
       if (id) {
         console.log("Editing reservation with ID:", id)
         // Fetch existing reservation data by ID and populate form for editing
         getReservation(id)
       }
     }, []);
-    
-  }
   return (
     <>
       <Nav />

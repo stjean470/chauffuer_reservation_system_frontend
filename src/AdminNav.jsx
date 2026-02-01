@@ -2,11 +2,12 @@ import React from 'react'
 import { Button, Navbar, NavbarBrand, NavbarCollapse, NavbarLink, NavbarToggle } from "flowbite-react";
 
 const AdminNav = (props) => {
-    const { isDarkMode, setIsDarkMode } = props;
+    const { isDarkMode, setIsDarkMode, isOpen, setIsOpen } = props;
   return (
     <>
         <Navbar fluid rounded className={isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}>
-            <NavbarBrand  href="https://flowbite-react.com">
+            <NavbarBrand>
+                <NavbarToggle className="md:block" onClick={() => setIsOpen(!isOpen)} />
                 <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Admin Portal</span>
             </NavbarBrand>
             <div className='flex md:order-3'>
